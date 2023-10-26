@@ -1,0 +1,6 @@
+centraldogma:
+  url: 127.0.0.1
+  port: 36462
+  project: demo
+  repository: meta
+  filePath: /myname.json
