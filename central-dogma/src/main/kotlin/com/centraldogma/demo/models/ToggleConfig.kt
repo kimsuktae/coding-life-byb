@@ -13,20 +13,40 @@ class ToggleConfig(
     fun isCanaryGroupedUser(userId: Long?): Boolean {
         return canary.checkUserIsCanaryGrouped(userId)
     }
+
+    companion object {
+        fun default(): ToggleConfig {
+            return ToggleConfig(
+                key = ToggleKey.DEFAULT.name,
+                enabled = true,
+                permission = PermissionConfig.default(),
+                canary = CanaryConfig.default(),
+            )
+        }
+    }
 }
 
 class PermissionConfig(
-    private val enabled: Boolean,
-    private val userIds: List<Long>,
+    val enabled: Boolean,
+    val userIds: List<Long>,
 ) {
     fun checkUserIsPermitted(userId: Long?): Boolean {
         return if (enabled) userIds.contains(userId) else false
     }
+
+    companion object {
+        fun default(): PermissionConfig {
+            return PermissionConfig(
+                enabled = false,
+                userIds = emptyList(),
+            )
+        }
+    }
 }
 
 class CanaryConfig(
-    private val enabled: Boolean,
-    private val percentage: Int,
+    val enabled: Boolean,
+    val percentage: Int,
 ) {
     fun checkUserIsCanaryGrouped(userId: Long?): Boolean {
         if (userId == null) {
@@ -35,4 +55,17 @@ class CanaryConfig(
 
         return if (enabled) userId % 100 > percentage else false
     }
+
+    companion object {
+        fun default(): CanaryConfig {
+            return CanaryConfig(
+                enabled = false,
+                percentage = 0,
+            )
+        }
+    }
+}
+
+enum class ToggleKey {
+    DEFAULT,
 }

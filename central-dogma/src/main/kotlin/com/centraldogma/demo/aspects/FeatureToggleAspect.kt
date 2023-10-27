@@ -42,8 +42,10 @@ class FeatureToggleAspect private constructor(
 
         fun featureToggleProvider(featureToggleProvider: FeatureToggleProvider) =
             apply { this.featureToggleProvider = featureToggleProvider }
+
         fun fallbackExecutor(fallbackExecutor: FeatureToggleFallbackExecutor) =
             apply { this.fallbackExecutor = fallbackExecutor }
+
         fun build() = FeatureToggleAspect(featureToggleProvider, fallbackExecutor)
     }
 }

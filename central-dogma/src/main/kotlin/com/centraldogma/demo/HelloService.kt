@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class HelloService {
-    @FeatureToggle(key = "NEW_HELLO", fallbackMethod = "oldHello")
+    @FeatureToggle(key = "DEFAULT", fallbackMethod = "oldHello")
     fun hello(userId: Long): String {
         return "new hello"
     }

@@ -3,7 +3,9 @@ package com.centraldogma.demo.featureToggleProviders
 import com.centraldogma.demo.models.ToggleConfig
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.linecorp.centraldogma.client.CentralDogma
+import com.linecorp.centraldogma.common.Change
 import com.linecorp.centraldogma.common.Query
+import com.linecorp.centraldogma.common.Revision
 import jakarta.annotation.PostConstruct
 import java.util.concurrent.atomic.AtomicReference
 
@@ -33,16 +35,44 @@ class FeatureToggleProviderImpl private constructor(
 
     @PostConstruct
     fun init() {
-        val watcher = centralDogma.forRepo(project, repository)
+        createRepositoryIfNotExists()
+        watchFile()
+    }
+
+    private fun watchFile() {
+        centralDogma.forRepo(project, repository)
             .watcher(Query.ofJson(filePath))
             .start()
+            .watch { _, value ->
+                val configs = value.fieldNames().asSequence().associateWith {
+                    jacksonObjectMapper().convertValue(value[it], ToggleConfig::class.java)
+                }
 
-        watcher.watch { _, value ->
-            val configs = value.fieldNames().asSequence().associateWith {
-                jacksonObjectMapper().convertValue(value[it], ToggleConfig::class.java)
+                toggleConfigMap.set(configs)
             }
+    }
 
-            toggleConfigMap.set(configs)
+    private fun createRepositoryIfNotExists() {
+        try {
+            centralDogma.forRepo(project, repository)
+                .file(Query.ofJson(filePath))
+                .get(Revision.HEAD)
+                .get()
+        } catch (exception: Exception) {
+            centralDogma.createRepository(project, repository).also {
+                val defaultToggle = ToggleConfig.default()
+
+                centralDogma.forRepo(project, repository)
+                    .commit(
+                        "First Commit", Change.ofJsonUpsert(
+                            filePath,
+                            jacksonObjectMapper().writeValueAsString(
+                                mapOf(defaultToggle.key to defaultToggle)
+                            )
+                        )
+                    )
+                    .push(Revision.HEAD)
+            }
         }
     }
 
