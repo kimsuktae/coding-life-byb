@@ -57,7 +57,6 @@ class FeatureToggleProviderImpl private constructor(
             centralDogma.forRepo(project, repository)
                 .file(Query.ofJson(filePath))
                 .get(Revision.HEAD)
-                .get()
         } catch (exception: Exception) {
             centralDogma.createRepository(project, repository).also {
                 val defaultToggle = ToggleConfig.default()
