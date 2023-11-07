@@ -1,0 +1,28 @@
+spring:
+  kafka:
+    bootstrap-servers: 43.201.148.192:9092
+    listener:
+      type: batch
+      ack-mode: batch
+      log-container-config: true
+    producer:
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      key-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      properties:
+        enable.idempotence: true
+        acks: all
+        auto.register.schemas: false
+        use.latest.version: true
+    #      transaction-id-prefix: tx-
+    properties:
+      schema.registry.url: http://43.201.148.192:8081
+      basic:
+        auth:
+          credentials.source: USER_INFO
+          user.info: user1:password1
+
+server:
+  port: 8080
+logging:
+  level:
+    root: debug

@@ -1,0 +1,37 @@
+spring:
+  kafka:
+    bootstrap-servers: 43.201.148.192:9092
+    listener:
+      type: batch
+      ack-mode: batch
+      log-container-config: true
+    consumer:
+      group-id: demo
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      isolation-level: read_committed
+      max-poll-records: 1000
+      fetch-max-wait: 1s
+      fetch-min-size: 1MB
+      properties:
+        spring:
+          deserializer:
+            key:
+              delegate:
+                class: io.confluent.kafka.serializers.KafkaAvroDeserializer
+            #              function: net.htbeyond.common.spring.kafka.LoggingFailedDeserializationFunction
+            value:
+              delegate:
+                class: io.confluent.kafka.serializers.KafkaAvroDeserializer
+        #              function: net.htbeyond.common.spring.kafka.LoggingFailedDeserializationFunction
+        specific.avro.reader: true
+    properties:
+      schema.registry.url: http://43.201.148.192:8081
+      basic:
+        auth:
+          credentials.source: USER_INFO
+          user.info: user1:password1
+server:
+  port: 8081
