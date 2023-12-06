@@ -1,0 +1,1 @@
+{"type":"record","name":"Key","namespace":"com.kafkaschema.demo.data","fields":[{"name":"message_id","type":"string"}]}
