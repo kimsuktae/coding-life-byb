@@ -10,7 +10,8 @@ class BowlingGame(
             val scanner = Scanner(System.`in`)
             println("공을 굴려주세요")
 
-            val score = scanner.next()
+            val ball = scanner.next().toInt()
+            throwBall(ball)
         }
     }
 
