@@ -3,7 +3,6 @@ import java.util.Scanner
 class BowlingGame(
     private val isPlaying: Boolean = true,
     private var frame: Frame = Frame(),
-    private var throws: Int = 0,
 ) {
 
     fun play() {
@@ -20,7 +19,6 @@ class BowlingGame(
     }
 
     fun score(): Int {
-        println(frame)
         return frame.score()
     }
 }
@@ -69,53 +67,48 @@ open class Frame(
 
     open fun score(): Int {
         var score = 0
-
         var current = this as Frame?
 
         while (current != null) {
-            if (current is FinalFrame) {
-                score += current.total
-
-                val temp = current.previousFame
-                val next = current
-
-                current = temp
-                current?.nextFrame = next
-
-                continue
-            }
-
-            if (current.isSpare()) {
-                current.bonus += current.nextFrame?.first!!
-            }
-
-            if (current.isStrike()) {
-                if (current.nextFrame is FinalFrame) {
-                    current.bonus += current.nextFrame?.first!!
-                    current.bonus += current.nextFrame?.second!!
-                }
-
-                if (current.nextFrame?.first!! == 10 && current.nextFrame !is FinalFrame) {
-                    current.bonus += current.nextFrame?.first!!
-                    current.bonus += current.nextFrame?.nextFrame?.first!!
-                }
-
-                if (current.nextFrame?.first!! != 10 && current.nextFrame !is FinalFrame) {
-                    current.bonus += current.nextFrame?.first!!
-                    current.bonus += current.nextFrame?.second!!
-                }
-            }
+            current.calculateBonus()
 
             score += current.total
 
-            val temp = current.previousFame
             val next = current
 
-            current = temp
+            current = current.previousFame
             current?.nextFrame = next
         }
 
         return score
+    }
+
+    open fun calculateBonus() {
+        if (this.isSpare() || this.isStrike()) {
+            this.nextFrame?.addPreviousFrameBonus()
+        }
+    }
+
+    open fun addPreviousFrameBonus() {
+        if (this.previousFame?.isSpare()!!) {
+            this.previousFame?.addBonus(this.first)
+
+            return
+        }
+
+        if (this.previousFame?.isStrike()!!) {
+            if (this.isStrike()) {
+                this.previousFame?.addBonus(this.first + this.nextFrame?.first!!)
+
+                return
+            }
+
+            this.previousFame?.addBonus(this.first + this.second)
+        }
+    }
+
+    fun addBonus(bonus: Int) {
+        this.bonus = bonus
     }
 
     fun isStrike(): Boolean {
@@ -129,11 +122,11 @@ open class Frame(
     override fun toString(): String {
         val score = mutableListOf<Int>()
 
-        var b = this as Frame?
+        var current = this as Frame?
 
-        while (b != null) {
-            score.add(b.total)
-            b = b.previousFame
+        while (current != null) {
+            score.add(current.total)
+            current = current.previousFame
         }
 
         return score.toString()
@@ -174,5 +167,13 @@ class FinalFrame(
         }
 
         return this
+    }
+
+    override fun calculateBonus() {
+        return
+    }
+
+    override fun addPreviousFrameBonus() {
+        this.previousFame?.addBonus(this.first + this.second)
     }
 }
